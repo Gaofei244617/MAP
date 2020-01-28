@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <numeric>
+#include <cstdlib>
 
 namespace map
 {
@@ -78,9 +79,13 @@ namespace map
 	GT_BOX get_gt_boxes(const string& gt_boxes_file)
 	{
 		GT_BOX gt_boxes;
-
 		// 逐行读取并解析ground truth boxes文件
 		std::ifstream in(gt_boxes_file, std::ios::in);
+		if (!in.is_open())
+		{
+			std::cout << "file: " << gt_boxes_file << " does not exists!" << std::endl;
+			abort();
+		}
 		std::string line;
 		while (getline(in, line))
 		{
@@ -136,6 +141,12 @@ namespace map
 		DETECT_BOX ret; // vector<tuple<string, double, Box>>
 		// 逐行读取并解析ground truth boxes文件
 		std::ifstream in(detect_file, std::ios::in);
+		if (!in.is_open())
+		{
+			std::cout << "file: " << detect_file << " does not exists!" << std::endl;
+			abort();
+		}
+
 		std::string line;
 		std::string image_name;
 		Box box;
