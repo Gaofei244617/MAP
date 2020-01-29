@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+project(map)
+aux_source_directory(. MAIN)
+aux_source_directory(3rdpart/tinyxml TXML)
+add_executable(cal_map ${MAIN} ${TXML})

@@ -2,33 +2,33 @@
     <map_type>VOC2012</map_type>
     <map_iou_thresh>0.5</map_iou_thresh>
     <scene name="all">
-        <gt_box>G:\map\map\gt_boxes.txt</gt_box>
-        <detection name="aeroplane">G:\map\map\detection\aeroplane.txt</detection>
-        <detection name="bicycle">G:\map\map\detection\bicycle.txt</detection>
-        <detection name="bird">G:\map\map\detection\bird.txt</detection>
-        <detection name="boat">G:\map\map\detection\boat.txt</detection>
-        <detection name="bottle">G:\map\map\detection\bottle.txt</detection>
-        <detection name="bus">G:\map\map\detection\bus.txt</detection>
-        <detection name="car">G:\map\map\detection\car.txt</detection>
-        <detection name="cat">G:\map\map\detection\cat.txt</detection>
-        <detection name="chair">G:\map\map\detection\chair.txt</detection>
-        <detection name="cow">G:\map\map\detection\cow.txt</detection>
-        <detection name="diningtable">G:\map\map\detection\diningtable.txt</detection>
-        <detection name="dog">G:\map\map\detection\dog.txt</detection>
-        <detection name="horse">G:\map\map\detection\horse.txt</detection>
-        <detection name="motorbike">G:\map\map\detection\motorbike.txt</detection>
-        <detection name="person">G:\map\map\detection\person.txt</detection>
-        <detection name="pottedplant">G:\map\map\detection\pottedplant.txt</detection>
-        <detection name="sheep">G:\map\map\detection\sheep.txt</detection>
-        <detection name="sofa">G:\map\map\detection\sofa.txt</detection>
-        <detection name="train">G:\map\map\detection\train.txt</detection>
-        <detection name="tvmonitor">G:\map\map\detection\tvmonitor.txt</detection>
+        <gt_box>gt_boxes.txt</gt_box>
+        <detection name="aeroplane">detection/aeroplane.txt</detection>
+        <detection name="bicycle">detection/bicycle.txt</detection>
+        <detection name="bird">detection/bird.txt</detection>
+        <detection name="boat">detection/boat.txt</detection>
+        <detection name="bottle">detection/bottle.txt</detection>
+        <detection name="bus">detection/bus.txt</detection>
+        <detection name="car">detection/car.txt</detection>
+        <detection name="cat">detection/cat.txt</detection>
+        <detection name="chair">detection/chair.txt</detection>
+        <detection name="cow">detection/cow.txt</detection>
+        <detection name="diningtable">detection/diningtable.txt</detection>
+        <detection name="dog">detection/dog.txt</detection>
+        <detection name="horse">detection/horse.txt</detection>
+        <detection name="motorbike">detection/motorbike.txt</detection>
+        <detection name="person">detection/person.txt</detection>
+        <detection name="pottedplant">detection/pottedplant.txt</detection>
+        <detection name="sheep">detection/sheep.txt</detection>
+        <detection name="sofa">detection/sofa.txt</detection>
+        <detection name="train">detection/train.txt</detection>
+        <detection name="tvmonitor">detection/tvmonitor.txt</detection>
     </scene>
     <scene name="part">
-        <gt_box>G:\map\map\gt_boxes.txt</gt_box>
-        <detection name="aeroplane">G:\map\map\detection\aeroplane.txt</detection>
-        <detection name="bicycle">G:\map\map\detection\bicycle.txt</detection>
-        <detection name="bird">G:\map\map\detection\bird.txt</detection>
+        <gt_box>gt_boxes.txt</gt_box>
+        <detection name="aeroplane">detection/aeroplane.txt</detection>
+        <detection name="bicycle">detection/bicycle.txt</detection>
+        <detection name="bird">detection/bird.txt</detection>
     </scene>
 
 </config>
