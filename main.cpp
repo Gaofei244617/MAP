@@ -8,10 +8,8 @@ int main()
 {
 	clock_t startTime, endTime;
 	
-	Config config = parse_configfile();	  // 解析配置文件
-
 	startTime = clock();//计时开始
-	auto ap = cal_map_all(config);
+	auto ap = cal_map_all("config.xml");
 	endTime = clock();//计时结束
 	for (auto scene : ap)
 	{

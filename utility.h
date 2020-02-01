@@ -32,7 +32,7 @@ namespace map
 	};
 
 	// 解析xml配置文件
-	Config parse_configfile();
+	Config parse_configfile(const string& cfg);
 
 	// 获取ground truth boxes
 	GT_BOX get_gt_boxes(const string& gt_boxes_file);
@@ -61,5 +61,5 @@ namespace map
 	AP_ITEM cal_map_one(const GT_BOX& gt_boxes, const DETECT_BOX& det_boxes, const string& obj_type, const string& map_type, double iou_thresh);
 	
 	// 计算mAP
-	AP cal_map_all(const Config& config);
+	AP cal_map_all(const string& cfg);
 }

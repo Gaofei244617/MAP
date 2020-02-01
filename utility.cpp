@@ -10,12 +10,12 @@
 namespace map
 {
 	// 解析xml配置文件
-	Config parse_configfile()
+	Config parse_configfile(const string& cfg)
 	{
 		TiXmlDocument doc; // XML文档
 		Config config;     // 存储从XML解析的配置参数
 
-		if (!doc.LoadFile("config.xml")) // 加载XML文档
+		if (!doc.LoadFile(cfg.c_str())) // 加载XML文档
 		{
 			std::cerr << doc.ErrorDesc() << std::endl;
 			return config;
@@ -334,8 +334,9 @@ namespace map
 		return make_tuple(move(recall), move(precision), move(tp), move(fp), move(fn), ap);
 	}
 
-	AP cal_map_all(const Config& config)
+	AP cal_map_all(const string& cfg)
 	{
+		const Config config = parse_configfile(cfg);
 		const double iou_thresh = config.iou_thresh;
 		const string map_type = config.map_type;
 		AP ret;   	// {"scene": {"obj_type": AP_ITEM}}
