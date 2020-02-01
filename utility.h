@@ -17,7 +17,7 @@ namespace map
 	// {"imagename" : ([Box,...], [false,...])}
 	using GT_BOX_CLASS = unordered_map<string, tuple<vector<Box>, vector<bool>>>;
 	// ([recall, ...], [precision, ...], [tp, ...], [fp, ...], [fn, ...], ap)
-	using AP_ITEM = tuple<vector<double>, vector<double>, vector<int>, vector<int>, vector<int>, double>;
+	using AP_ITEM = tuple<vector<int>, vector<int>, vector<int>, vector<double>, vector<double>, double>;
 	// {"scene": {"obj_type": AP_ITEM}}
 	using AP = unordered_map<string, unordered_map<string, AP_ITEM>>;
 

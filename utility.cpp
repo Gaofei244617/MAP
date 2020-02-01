@@ -331,7 +331,7 @@ namespace map
 			fn[i] = gtBox_num - tp[i];
 		}
 		double ap = cal_ap(recall, precision, map_type);
-		return make_tuple(move(recall), move(precision), move(tp), move(fp), move(fn), ap);
+		return make_tuple(move(tp), move(fp), move(fn), move(recall), move(precision), ap);
 	}
 
 	AP cal_map_all(const string& cfg)
