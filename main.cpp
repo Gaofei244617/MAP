@@ -16,7 +16,7 @@ int main()
 		for (auto item : scene.second)
 		{
 			string name = item.first;
-			double a = std::get<5>(item.second);
+			double a = std::get<6>(item.second);
 			std::cout << name << "  " << a << std::endl;
 		}
 	}

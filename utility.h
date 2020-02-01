@@ -17,7 +17,7 @@ namespace map
 	// {"imagename" : ([Box,...], [false,...])}
 	using GT_BOX_CLASS = unordered_map<string, tuple<vector<Box>, vector<bool>>>;
 	// ([recall, ...], [precision, ...], [tp, ...], [fp, ...], [fn, ...], ap)
-	using AP_ITEM = tuple<vector<int>, vector<int>, vector<int>, vector<double>, vector<double>, double>;
+	using AP_ITEM = tuple<vector<double>, vector<int>, vector<int>, vector<int>, vector<double>, vector<double>, double>;
 	// {"scene": {"obj_type": AP_ITEM}}
 	using AP = unordered_map<string, unordered_map<string, AP_ITEM>>;
 
@@ -45,8 +45,8 @@ namespace map
 	GT_BOX_CLASS get_gtBox(const GT_BOX& gtBox, const string& obj_type);
 	
 	// 获取按照置信度排序后的检测结果
-	// 返回值（置信度排序索引, imgname_lsit, box_list）
-	tuple<vector<int>, vector<string>, vector<Box>> get_sorted_det(const DETECT_BOX& det);
+	// 返回值（置信度排序索引, 置信度排序, imgname_lsit, box_list）
+	tuple<vector<int>, vector<double>, vector<string>, vector<Box>> get_sorted_det(const DETECT_BOX& det);
 
 	// 计算两个box的IoU
 	double cal_IoU(const Box& box_a, const Box& box_b);

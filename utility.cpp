@@ -167,19 +167,21 @@ namespace map
 	}
 
 	// 获取按照置信度排序后的检测结果
-	tuple<vector<int>, vector<string>, vector<Box>> get_sorted_det(const DETECT_BOX& det)
+	tuple<vector<int>, vector<double>, vector<string>, vector<Box>> get_sorted_det(const DETECT_BOX& det)
 	{
 		vector<int> sorted_index(det.size());
+		vector<double> sorted_scores;
 		vector<string> sorted_imgNames;
 		vector<Box> sorted_boxes;
 		std::iota(sorted_index.begin(), sorted_index.end(), 0);
 		std::sort(sorted_index.begin(), sorted_index.end(), [&det](int x, int y) {return get<1>(det[x]) > get<1>(det[y]); });
 		for (int index : sorted_index)
 		{
+			sorted_scores.push_back(get<1>(det[index]));
 			sorted_imgNames.emplace_back(get<0>(det[index]));
 			sorted_boxes.push_back(get<2>(det[index]));
 		}
-		return make_tuple(move(sorted_index), move(sorted_imgNames), move(sorted_boxes));
+		return make_tuple(move(sorted_index), move(sorted_scores), move(sorted_imgNames), move(sorted_boxes));
 	}
 
 	// 计算两个box的IoU
@@ -266,9 +268,10 @@ namespace map
 		auto det = get_gtBox(gt_boxes, obj_type);
 
 		vector<int> sorted_index;             // 按置信度降序排序后的下标索引
+		vector<double> sorted_scores;         // 置信度降序排序
 		vector<string> sorted_imgNames;       // 按置信度降序排序后的图片名称
 		vector<Box> sorted_boxes;             // 按置信度降序排序后的检测框
-		std::tie(sorted_index, sorted_imgNames, sorted_boxes) = get_sorted_det(det_boxes);
+		std::tie(sorted_index, sorted_scores, sorted_imgNames, sorted_boxes) = get_sorted_det(det_boxes);
 
 		const auto len = sorted_boxes.size();  // 检测框数量 
 		vector<int> tp(len, 0);
@@ -331,7 +334,7 @@ namespace map
 			fn[i] = gtBox_num - tp[i];
 		}
 		double ap = cal_ap(recall, precision, map_type);
-		return make_tuple(move(tp), move(fp), move(fn), move(recall), move(precision), ap);
+		return make_tuple(move(sorted_scores), move(tp), move(fp), move(fn), move(recall), move(precision), ap);
 	}
 
 	AP cal_map_all(const string& cfg)
