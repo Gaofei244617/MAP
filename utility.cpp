@@ -207,63 +207,62 @@ namespace map
 		}
 		return 0;
 	}
-
-	// 计算AP值
-	double cal_ap(vector<double> recall, vector<double> precision, const string map_type)
+	
+	// 计算AP值 VOC2007
+	double cal_ap_voc2007(vector<double> recall, vector<double> precision)
 	{
 		double ap = 0;
-		if (map_type == "VOC2007")
+		const vector<double> conf = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
+		for (double t : conf)
 		{
-			const vector<double> conf = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
-			for (double t : conf)
+			int count = 0;
+			vector<int> index;
+			vector<double> prec;
+			for (int i = 0; i < recall.size(); i++)
 			{
-				int count = 0;
-				vector<int> index;
-				vector<double> prec;
-				for (int i = 0; i < recall.size(); i++)
+				if (recall[i] >= t)
 				{
-					if (recall[i] >= t)
-					{
-						count++;
-						index.push_back(i);
-						prec.push_back(precision[i]);
-					}
+					count++;
+					index.push_back(i);
+					prec.push_back(precision[i]);
 				}
-				double p = 0;
-				if (count == 0)
-				{
-					p = 0;
-				}
-				else
-				{
-					p = *std::max(prec.begin(), prec.end());
-				}
+			}
+			double p = 0;
+			if (count == 0)
+			{
+				p = 0;
+			}
+			else
+			{
+				p = *std::max(prec.begin(), prec.end());
+			}
 
-				ap = ap + p / 11.0;
-			}
-			return ap;
+			ap = ap + p / 11.0;
 		}
-		if (map_type == "VOC2012")
+		return ap;
+	}
+
+	// 计算AP值 VOC2012
+	double cal_ap_voc2012(vector<double> recall, vector<double> precision)
+	{
+		double ap = 0;
+		recall.push_back(1.0);
+		recall.insert(recall.begin(), 0);
+		precision.push_back(0);
+		precision.insert(precision.begin(), 0);
+		for (auto i = precision.size() - 1; i > 0; i--)
 		{
-			recall.push_back(1.0);
-			recall.insert(recall.begin(), 0);
-			precision.push_back(0);
-			precision.insert(precision.begin(), 0);
-			for (auto i = precision.size() - 1; i > 0; i--)
-			{
-				precision[i - 1] = std::max(precision[i - 1], precision[i]);
-			}
-			for (int i = 0; i < precision.size() - 1; i++)
-			{
-				ap = ap + (recall[i + 1] - recall[i]) * precision[i + 1];
-			}
-			return ap;
+			precision[i - 1] = std::max(precision[i - 1], precision[i]);
+		}
+		for (int i = 0; i < precision.size() - 1; i++)
+		{
+			ap = ap + (recall[i + 1] - recall[i]) * precision[i + 1];
 		}
 		return ap;
 	}
 	
 	// 计算一个场景一个object type下AP相关数据
-	AP_ITEM cal_map_one(const GT_BOX& gt_boxes, const DETECT_BOX& det_boxes, const string& obj_type, const string& map_type, double iou_thresh)
+	AP_ITEM cal_map_one(const GT_BOX& gt_boxes, const DETECT_BOX& det_boxes, const string& obj_type, const string& map_type, double iou)
 	{
 		auto det = get_gtBox(gt_boxes, obj_type);
 
@@ -273,67 +272,103 @@ namespace map
 		vector<Box> sorted_boxes;             // 按置信度降序排序后的检测框
 		std::tie(sorted_index, sorted_scores, sorted_imgNames, sorted_boxes) = get_sorted_det(det_boxes);
 
-		const auto len = sorted_boxes.size();  // 检测框数量 
-		vector<int> tp(len, 0);
-		vector<int> fp(len, 0);
-		vector<int> fn(len, 0);
-		// 用每一个预测的目标框去匹配真实目标框
-		for (int i = 0; i < len; i++)
+		vector<double> iou_vec;
+		if (map_type == "COCO")
 		{
-			vector<Box>& gt_bb = std::get<0>(det[sorted_imgNames[i]]);      // 预测框所在图片的所有gt box
-			vector<bool>& det_flag = std::get<1>(det[sorted_imgNames[i]]);  // gt box是否被检出标志位
-			Box det_box = sorted_boxes[i];    // 预测的目标框
-			if (gt_bb.size() > 0)
+			iou_vec = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95};
+		}
+		else
+		{
+			iou_vec = {iou};
+		}
+
+		double ap = 0;
+		const auto len = sorted_boxes.size();  // 检测框数量
+		vector<int> tp;
+		vector<int> fp;
+		vector<int> fn;
+		vector<double> recall(len, 0);
+		vector<double> precision(len, 0);
+		for (const double iou_thresh : iou_vec)
+		{
+			tp.assign(len, 0);
+			fp.assign(len, 0);
+			fn.assign(len, 0);
+			// 用每一个预测的目标框去匹配真实目标框
+			for (int i = 0; i < len; i++)
 			{
-				vector<double> iou(gt_bb.size(), 0);  // 检测框与图片中所有gt box的IoU
-				for (int k = 0; k < gt_bb.size(); k++)
+				vector<Box>& gt_bb = std::get<0>(det[sorted_imgNames[i]]);      // 预测框所在图片的所有gt box
+				vector<bool>& det_flag = std::get<1>(det[sorted_imgNames[i]]);  // gt box是否被检出标志位
+				det_flag.assign(det_flag.size(), false);    // 数据初始化
+				Box det_box = sorted_boxes[i];    // 预测的目标框
+				if (gt_bb.size() > 0)
 				{
-					iou[k] = cal_IoU(gt_bb[k], det_box);
-				}
-				auto max_iter = std::max_element(iou.begin(), iou.end()); // 最大IoU
-				auto jmax = std::distance(iou.begin(), max_iter); // 最大IoU的位置（匹配到的gt box的位置）
-				if (*max_iter > iou_thresh)
-				{
-					if (det_flag[jmax] == false)
+					vector<double> iou(gt_bb.size(), 0);  // 检测框与图片中所有gt box的IoU
+					for (int k = 0; k < gt_bb.size(); k++)
 					{
-						tp[i] = 1;
-						det_flag[jmax] = true;
+						iou[k] = cal_IoU(gt_bb[k], det_box);
+					}
+					auto max_iter = std::max_element(iou.begin(), iou.end()); // 最大IoU
+					auto jmax = std::distance(iou.begin(), max_iter); // 最大IoU的位置（匹配到的gt box的位置）
+					if (*max_iter > iou_thresh)
+					{
+						if (det_flag[jmax] == false)
+						{
+							tp[i] = 1;
+							det_flag[jmax] = true;
+						}
+						else
+						{
+							fp[i] = 1;
+						}
 					}
 					else
 					{
 						fp[i] = 1;
 					}
 				}
-				else
-				{
-					fp[i] = 1;
-				}
+			}
+
+			int gtBox_num = 0;                    // gt box数量
+			for (const auto& item : det)
+			{
+				gtBox_num += int(std::get<0>(item.second).size());
+			}
+
+			vector<double> rec(len, 0);
+			vector<double> prec(len, 0);
+			rec[0] = tp[0] / static_cast<double>(gtBox_num);
+			prec[0] = tp[0] / static_cast<double>(tp[0] + fp[0]);
+			for (int i = 1; i < len; i++)
+			{
+				tp[i] = tp[i] + tp[i - 1]; // cumsum
+				fp[i] = fp[i] + fp[i - 1]; // cumsum
+				rec[i] = tp[i] / static_cast<double>(gtBox_num);
+				prec[i] = tp[i] / static_cast<double>(tp[i] + fp[i]);
+			}
+			double p = 0;
+			if (map_type == "VOC2007")
+			{
+				p = cal_ap_voc2007(rec, prec);
+			}
+			else
+			{
+				p = cal_ap_voc2012(rec, prec);
+			}
+			ap = ap + p / iou_vec.size();
+
+			// 计算recall, precision, fn
+			for (size_t i = 0; i < len; i++)
+			{
+				recall[i] = recall[i] + rec[i] / iou_vec.size();
+				precision[i] = precision[i] + prec[i] / iou_vec.size();
+				fn[i] = gtBox_num - tp[i];
 			}
 		}
-
-		int gtBox_num = 0;                    // gt box数量
-		for (const auto& item : det)
+		if (map_type == "COCO")
 		{
-			gtBox_num += int(std::get<0>(item.second).size());
+			return make_tuple(move(sorted_scores), vector<int>(), vector<int>(), vector<int>(), move(recall), move(precision), ap);
 		}
-
-		vector<double> recall(len, 0);
-		vector<double> precision(len, 0);
-		recall[0] = tp[0] / static_cast<double>(gtBox_num);
-		precision[0] = tp[0] / static_cast<double>(tp[0] + fp[0]);
-		for (int i = 1; i < len; i++)
-		{
-			tp[i] = tp[i] + tp[i - 1];
-			fp[i] = fp[i] + fp[i - 1];
-			recall[i] = tp[i] / static_cast<double>(gtBox_num);
-			precision[i] = tp[i] / static_cast<double>(tp[i] + fp[i]);
-		}
-		// 计算fn
-		for (size_t i = 0; i < tp.size(); i++)
-		{
-			fn[i] = gtBox_num - tp[i];
-		}
-		double ap = cal_ap(recall, precision, map_type);
 		return make_tuple(move(sorted_scores), move(tp), move(fp), move(fn), move(recall), move(precision), ap);
 	}
 

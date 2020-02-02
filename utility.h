@@ -16,7 +16,7 @@ namespace map
 	using DETECT_BOX = vector<tuple<string, double, Box>>;
 	// {"imagename" : ([Box,...], [false,...])}
 	using GT_BOX_CLASS = unordered_map<string, tuple<vector<Box>, vector<bool>>>;
-	// ([recall, ...], [precision, ...], [tp, ...], [fp, ...], [fn, ...], ap)
+	// ([conf], [tp, ...], [fp, ...], [fn, ...], [recall, ...], [precision, ...], ap)
 	using AP_ITEM = tuple<vector<double>, vector<int>, vector<int>, vector<int>, vector<double>, vector<double>, double>;
 	// {"scene": {"obj_type": AP_ITEM}}
 	using AP = unordered_map<string, unordered_map<string, AP_ITEM>>;
@@ -51,11 +51,11 @@ namespace map
 	// 计算两个box的IoU
 	double cal_IoU(const Box& box_a, const Box& box_b);
 
-	// 计算AP,入参[recall, ...], [precision, ...], "map_type"
-	double cal_ap(vector<double>, vector<double>, string);
-
-	// 计算AP值
-	double cal_ap(vector<double> recall, vector<double> precision, const string map_type);
+	// 计算AP值 VOC2007
+	double cal_ap_voc2007(vector<double> recall, vector<double> precision);
+	
+	// 计算AP值 VOC2012
+	double cal_ap_voc2012(vector<double> recall, vector<double> precision);
 	
 	// 计算一个场景一个object type下AP相关数据
 	AP_ITEM cal_map_one(const GT_BOX& gt_boxes, const DETECT_BOX& det_boxes, const string& obj_type, const string& map_type, double iou_thresh);
